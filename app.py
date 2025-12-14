@@ -11,8 +11,8 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-st.title("🧥 Virtual Try-On Demo")
-st.markdown("This is a professional prototype. Upload a person and a clothing image, adjust measurements, and preview the result.")
+st.title("Virtual Try-On")
+st.markdown("Upload a person and a clothing image, adjust measurements and preview the result.")
 
 # ----------------------------
 # SIDEBAR CONTROLS
@@ -23,7 +23,6 @@ with st.sidebar:
     chest = st.slider("Chest (cm)", 70, 120, 90)
     waist = st.slider("Waist (cm)", 60, 110, 80)
     hips = st.slider("Hips (cm)", 70, 120, 90)
-    tightness = st.slider("Tightness", 0.0, 1.0, 0.5)
     st.markdown("---")
     apply_button = st.button("Apply Clothing")
     reset_button = st.button("Reset Inputs")
@@ -102,13 +101,3 @@ elif clothing_img:
 else:
     st.info("Upload images to see a preview.")
 
-# ----------------------------
-# OPTIONAL: INFO / NOTES
-# ----------------------------
-st.markdown("---")
-st.markdown("""
-**Notes:**  
-- This is a demo prototype.  
-- Measurements are illustrative; model integration will produce realistic fit.  
-- Tightness slider simulates how tight or loose clothing appears.  
-""")

@@ -1,103 +1,97 @@
 import streamlit as st
-from PIL import Image, ImageDraw, ImageFont
-import io
+from PIL import Image
 
-# ----------------------------
-# PAGE CONFIG
-# ----------------------------
 st.set_page_config(
     page_title="Virtual Try-On",
-    layout="wide",
-    initial_sidebar_state="expanded"
+    layout="centered",
 )
 
-st.title("Virtual Try-On")
-st.markdown("Upload a person and a clothing image, adjust measurements and preview the result.")
+# ---------- Custom CSS ----------
+st.markdown("""
+<style>
+.step {
+    display: inline-block;
+    padding: 8px 14px;
+    border-radius: 50%;
+    background: #e5e7eb;
+    color: #374151;
+    font-weight: 600;
+    margin-right: 8px;
+}
+.step.active {
+    background: #ec4899;
+    color: white;
+}
+.notice {
+    background-color: #ffe4e6;
+    padding: 12px;
+    border-radius: 8px;
+    color: #be123c;
+    font-size: 14px;
+    margin-bottom: 25px;
+}
+.upload-box {
+    border: 2px dashed #d1d5db;
+    padding: 30px;
+    border-radius: 10px;
+    text-align: center;
+    color: #6b7280;
+}
+</style>
+""", unsafe_allow_html=True)
 
-# ----------------------------
-# SIDEBAR CONTROLS
-# ----------------------------
-with st.sidebar:
-    st.header("Measurements & Controls")
-    height = st.slider("Height (cm)", 140, 210, 170)
-    chest = st.slider("Chest (cm)", 70, 120, 90)
-    waist = st.slider("Waist (cm)", 60, 110, 80)
-    hips = st.slider("Hips (cm)", 70, 120, 90)
-    st.markdown("---")
-    apply_button = st.button("Apply Clothing")
-    reset_button = st.button("Reset Inputs")
+# ---------- Header ----------
+st.markdown("<h1 style='text-align:center;'>Virtual Try-On Experience</h1>", unsafe_allow_html=True)
+st.markdown(
+    "<p style='text-align:center; color:#6b7280;'>"
+    "Upload your photo, enter your measurements, and see how any garment looks on you before you buy. "
+    "Precision fitting powered by AI.</p>",
+    unsafe_allow_html=True
+)
 
-# ----------------------------
-# IMAGE UPLOADS
-# ----------------------------
-col1, col2 = st.columns(2)
+# ---------- Privacy Notice ----------
+st.markdown(
+    "<div class='notice'>🔒 Your photos and measurements are used only for this session and are not stored permanently.</div>",
+    unsafe_allow_html=True
+)
+
+# ---------- Steps ----------
+st.markdown("""
+<div style="text-align:center; margin-bottom:30px;">
+    <span class="step active">1</span> Your Photo
+    <span class="step">2</span> Measurements
+    <span class="step">3</span> Clothing
+    <span class="step">4</span> Preview
+</div>
+""", unsafe_allow_html=True)
+
+# ---------- Upload Section ----------
+st.markdown("### Upload Clothing Image")
+st.markdown(
+    "Upload a clear image of the garment you want to try on. "
+    "Flat-lay or mannequin photos work best."
+)
+
+uploaded_file = st.file_uploader(
+    "",
+    type=["jpg", "jpeg", "png"],
+    label_visibility="collapsed"
+)
+
+if uploaded_file:
+    image = Image.open(uploaded_file)
+    st.image(image, caption="Uploaded Clothing Image", use_container_width=True)
+
+# ---------- Buttons ----------
+col1, col2 = st.columns([1, 1])
 
 with col1:
-    st.subheader("Person Image")
-    person_file = st.file_uploader("Upload Person Photo", type=["png", "jpg", "jpeg"], key="person")
+    st.button("⬅ Back")
 
 with col2:
-    st.subheader("Clothing Image")
-    clothing_file = st.file_uploader("Upload Clothing Photo", type=["png", "jpg", "jpeg"], key="clothing")
-
-# ----------------------------
-# RESET FUNCTIONALITY
-# ----------------------------
-if reset_button:
-    st.session_state.person = None
-    st.session_state.clothing = None
-    st.experimental_rerun()
-
-# ----------------------------
-# LOAD IMAGES
-# ----------------------------
-person_img = None
-clothing_img = None
-
-if person_file:
-    person_img = Image.open(person_file).convert("RGBA")
-if clothing_file:
-    clothing_img = Image.open(clothing_file).convert("RGBA")
-
-# ----------------------------
-# APPLY CLOTHING (PLACEHOLDER)
-# ----------------------------
-def apply_clothing_demo(person, clothing, tightness=0.5):
-    """
-    Dummy function to simulate clothing application.
-    Scales clothing based on tightness and overlays on person.
-    """
-    if person is None or clothing is None:
-        return None
-
-    # Resize clothing proportionally to person
-    p_w, p_h = person.size
-    scale_factor = 0.6 + tightness * 0.4  # tight clothes = bigger overlay
-    new_w = int(p_w * scale_factor)
-    new_h = int(clothing.height * (new_w / clothing.width))
-    clothing_resized = clothing.resize((new_w, new_h), Image.ANTIALIAS)
-
-    # Overlay clothing in center
-    result = person.copy()
-    pos_x = (p_w - new_w) // 2
-    pos_y = int(p_h * 0.3)  # position around torso
-    result.paste(clothing_resized, (pos_x, pos_y), clothing_resized)
-    return result
-
-# ----------------------------
-# DISPLAY PREVIEW
-# ----------------------------
-st.subheader("Preview")
-if apply_button:
-    if person_img and clothing_img:
-        output = apply_clothing_demo(person_img, clothing_img, tightness)
-        st.image(output, use_column_width=True)
-    else:
-        st.warning("Please upload both person and clothing images to preview.")
-elif person_img:
-    st.image(person_img, caption="Person Image", use_column_width=True)
-elif clothing_img:
-    st.image(clothing_img, caption="Clothing Image", use_column_width=True)
-else:
-    st.info("Upload images to see a preview.")
-
+    if st.button("Start Try-On"):
+        if uploaded_file is None:
+            st.warning("Please upload a clothing image first.")
+        else:
+            st.success("Starting virtual try-on...")
+            # 👉 Call your ML / CV model here
